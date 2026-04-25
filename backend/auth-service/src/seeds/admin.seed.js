@@ -4,22 +4,23 @@ const pool = require('../config/db');
 
 async function seedAdmin() {
   try {
-    const correo = 'admin@plataforma.com';
-    const contraPlana = 'Admin@123456!';
+    const correo = 'admin@petmatch.com';
+    const contraPlana = 'Admin123456!';
     const hash = await bcrypt.hash(contraPlana, 12);
 
-    // id_rol = 1 corresponde a 'administrador' según el INSERT de roles
+    // id_rol = 1 → administrador
+    // est_usuario = 'activo' porque el admin no necesita completar perfil
     await pool.query(
-      `INSERT INTO USUARIOS 
-        (id_rol, telf_usuario, corr_usuario, contra_usuario,
-         nom_usuario, appell_usuario, fenac_usuario, gen_usuario, direc_usuario)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
-       ON CONFLICT DO NOTHING`,
-      [1, '0000000000', correo, hash, 'Admin', 'Sistema', '2000-01-01', true, 'Plataforma']
+      `INSERT INTO USUARIOS
+        (id_rol, corr_usuario, contra_usuario, nom_usuario, apell_usuario, est_usuario)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (corr_usuario) DO NOTHING`,
+      [1, correo, hash, 'Admin', 'Sistema', 'activo']
     );
+
     console.log('✅ Admin creado exitosamente');
-    console.log('   Correo: admin@plataforma.com');
-    console.log('   Contraseña: Admin@123456!');
+    console.log('   Correo:     admin@petmatch.com');
+    console.log('   Contraseña: Admin123456!');
     process.exit(0);
   } catch (error) {
     console.error('❌ Error al crear admin:', error);
