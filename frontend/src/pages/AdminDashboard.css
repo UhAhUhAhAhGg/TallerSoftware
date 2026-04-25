@@ -1,0 +1,227 @@
+/* filepath: src/pages/AdminDashboard.css */
+.admin-container {
+  min-height: 100vh;
+  background: #f8f9fa;
+}
+
+.admin-header {
+  background: white;
+  padding: 20px 40px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.admin-header h1 {
+  color: #333;
+  font-size: 24px;
+  margin: 0;
+}
+
+.logout-button {
+  padding: 10px 20px;
+  background: #e53e3e;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.logout-button:hover {
+  background: #c53030;
+}
+
+.admin-main {
+  padding: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.solicitudes-section h2 {
+  color: #333;
+  margin-bottom: 24px;
+  font-size: 20px;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  background: white;
+  border-radius: 12px;
+  color: #666;
+}
+
+.refugios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.refugio-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.refugio-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.refugio-card h3 {
+  color: #333;
+  margin: 0 0 8px 0;
+  font-size: 18px;
+}
+
+.refugio-email {
+  color: #666;
+  font-size: 14px;
+  margin: 0 0 4px 0;
+}
+
+.refugio-licencia {
+  color: #888;
+  font-size: 13px;
+  margin: 0 0 12px 0;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.status-badge.pendiente {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status-badge.aprobado {
+  background: #c6f6d5;
+  color: #22543d;
+}
+
+.status-badge.rechazado {
+  background: #fed7d7;
+  color: #822727;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  padding: 32px;
+  width: 100%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.modal-content h2 {
+  color: #333;
+  margin: 0 0 24px 0;
+  font-size: 22px;
+}
+
+.detalle-item {
+  margin-bottom: 16px;
+}
+
+.detalle-item label {
+  display: block;
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.detalle-item span {
+  color: #333;
+  font-size: 16px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.approve-button,
+.reject-button {
+  flex: 1;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+.approve-button {
+  background: #38a169;
+  color: white;
+}
+
+.approve-button:hover:not(:disabled) {
+  background: #2f855a;
+}
+
+.reject-button {
+  background: #e53e3e;
+  color: white;
+}
+
+.reject-button:hover:not(:disabled) {
+  background: #c53030;
+}
+
+.approve-button:disabled,
+.reject-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 768px) {
+  .admin-header {
+    padding: 16px 20px;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .admin-main {
+    padding: 20px;
+  }
+  
+  .refugios-grid {
+    grid-template-columns: 1fr;
+  }
+}
