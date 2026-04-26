@@ -1,4 +1,5 @@
 // filepath: src/routes/refugio.routes.js
+// backend\auth-service\src\routes\refugio.routes.js
 const express = require("express");
 const {
   guardarDatos,

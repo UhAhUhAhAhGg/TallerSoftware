@@ -1,11 +1,12 @@
+// filepath: src/pages/RefugioDashboard.tsx
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import Navbar from '../pages/Navbar.css';
 import './RefugioDashboard.css';
 
 export default function RefugioDashboard() {
   const navigate = useNavigate();
-  
   const [estadoRefugio, setEstadoRefugio] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [datosRefugio, setDatosRefugio] = useState<any>(null);
@@ -16,16 +17,11 @@ export default function RefugioDashboard() {
 
   const verificarEstado = async () => {
     try {
-      // Verificar el estado del usuario
       const estUsuario = localStorage.getItem('est_usuario');
       setEstadoRefugio(estUsuario);
-
-      // Si está activo, obtener los datos del refugio
       if (estUsuario === 'activo') {
         const response = await api.get('/refugios/datos');
-        if (response.data.success && response.data.data) {
-          setDatosRefugio(response.data.data);
-        }
+        if (response.data.success && response.data.data) setDatosRefugio(response.data.data);
       }
     } catch (error) {
       console.error('Error al verificar estado:', error);
@@ -36,147 +32,139 @@ export default function RefugioDashboard() {
 
   const handleLogout = () => {
     localStorage.clear();
-    navigate('/login');
+    navigate('/');
   };
 
-  // Loading
   if (loading) {
     return (
-      <div className="refugio-dashboard-container">
-        <div className="loading">Cargando...</div>
+      <div className="rd-wrapper">
+        <Navbar />
+        <div className="rd-main"><div className="loading">Cargando...</div></div>
       </div>
     );
   }
 
-  // Estado pendiente - mensaje de espera
   if (estadoRefugio === 'pendiente') {
     return (
-      <div className="refugio-dashboard-container">
-        <header className="refugio-dashboard-header">
-          <h1>🏠 Dashboard Refugio</h1>
-          <button className="logout-button" onClick={handleLogout}>
-            Cerrar Sesión
-          </button>
-        </header>
-
-        <main className="refugio-dashboard-main">
-          <div className="estado-card pendiente">
-            <div className="estado-icon">⏳</div>
+      <div className="rd-wrapper">
+        <Navbar />
+        <div className="rd-main">
+          <div className="rd-card pending">
+            <div className="rd-card-icon pending">⏳</div>
             <h2>Solicitud en Espera</h2>
-            <p>Tu solicitud de registro como refugio está pendiente de validación por un administrador.</p>
-            <p className="info-text">Recibirás una notificación cuando tu perfil sea aprobado.</p>
-            
+            <p>Tu solicitud de registro como refugio está <strong>pendiente de validación</strong> por un administrador.</p>
+            <p className="rd-info">Recibirás una notificación cuando tu perfil sea aprobado.</p>
             {datosRefugio && (
-              <div className="datos-enviados">
-                <h3>Datos enviados:</h3>
-                <p><strong>Nombre:</strong> {datosRefugio.nom_refug}</p>
-                <p><strong>Dirección:</strong> {datosRefugio.dir_refug}</p>
-                <p><strong>Teléfono:</strong> {datosRefugio.telf_refug}</p>
+              <div className="rd-datos">
+                <h3>Datos enviados</h3>
+                <div className="rd-dato-row"><span>Nombre</span><strong>{datosRefugio.nom_refug}</strong></div>
+                <div className="rd-dato-row"><span>Dirección</span><strong>{datosRefugio.dir_refug}</strong></div>
+                <div className="rd-dato-row"><span>Teléfono</span><strong>{datosRefugio.telf_refug}</strong></div>
               </div>
             )}
+            <div className="rd-btn-group">
+              <button className="rd-btn secondary" onClick={() => navigate('/')}>🏠 Volver al inicio</button>
+              <button className="rd-btn ghost" onClick={handleLogout}>Cerrar sesión</button>
+            </div>
           </div>
-        </main>
+        </div>
       </div>
     );
   }
 
-  // Estado activo - mostrar todas las opciones del refugio
   if (estadoRefugio === 'activo') {
     return (
-      <div className="refugio-dashboard-container">
-        <header className="refugio-dashboard-header">
-          <h1>🏠 Dashboard Refugio</h1>
-          <div className="header-info">
-            <span className="bienvenido">¡Bienvenido, {datosRefugio?.nom_refug || 'Refugio'}!</span>
-            <button className="logout-button" onClick={handleLogout}>
-              Cerrar Sesión
-            </button>
-          </div>
-        </header>
-
-        <main className="refugio-dashboard-main">
-          <div className="estado-card aprobado">
-            <div className="estado-icon">✓</div>
-            <h2>¡Tu refugio está aprobado!</h2>
-            <p>Ya puedes acceder a todas las funcionalidades como refugio.</p>
-          </div>
-
-          <div className="opciones-grid">
-            <div className="opcion-card" onClick={() => navigate('/refugio/mascotas')}>
-              <div className="opcion-icon">🐕</div>
-              <h3>Gestionar Mascotas</h3>
-              <p>Publicar, editar y eliminar mascotas en adopción</p>
+      <div className="rd-wrapper">
+        <Navbar />
+        <div className="rd-main">
+          <div className="rd-welcome">
+            <div className="rd-welcome-text">
+              <h1>¡Bienvenido, {datosRefugio?.nom_refug || 'Refugio'}! 🏠</h1>
+              <p>Tu refugio está aprobado. Gestiona tus mascotas y solicitudes desde aquí.</p>
             </div>
-
-            <div className="opcion-card" onClick={() => navigate('/refugio/adopciones')}>
-              <div className="opcion-icon">📋</div>
-              <h3>Adopciones</h3>
-              <p>Ver solicitudes de adopción de tus mascotas</p>
-            </div>
-
-            <div className="opcion-card" onClick={() => navigate('/completar-perfil/refugio')}>
-              <div className="opcion-icon">👤</div>
-              <h3>Mi Perfil</h3>
-              <p>Actualizar información de tu refugio</p>
-            </div>
-
-            <div className="opcion-card" onClick={() => navigate('/completar-perfil/refugio')}>
-              <div className="opcion-icon">🔔</div>
-              <h3>Notificaciones</h3>
-              <p>Ver notificaciones y mensajes</p>
+            <div className="rd-welcome-actions">
+              <button className="rd-btn secondary sm" onClick={() => navigate('/')}>🏠 Inicio</button>
+              <button className="rd-btn ghost sm" onClick={handleLogout}>Salir</button>
             </div>
           </div>
-        </main>
+
+          <div className="rd-approved-badge">
+            <span className="rd-approved-icon">✓</span>
+            <span>Refugio verificado y aprobado</span>
+          </div>
+
+          <div className="rd-grid">
+            <div className="rd-option" onClick={() => navigate('/refugio/mascotas')}>
+              <div className="rd-option-icon">🐕</div>
+              <div className="rd-option-info">
+                <h3>Gestionar Mascotas</h3>
+                <p>Publicar, editar y eliminar mascotas en adopción</p>
+              </div>
+              <span className="rd-option-arrow">→</span>
+            </div>
+            <div className="rd-option" onClick={() => navigate('/refugio/adopciones')}>
+              <div className="rd-option-icon">📋</div>
+              <div className="rd-option-info">
+                <h3>Solicitudes de Adopción</h3>
+                <p>Revisa y gestiona solicitudes de tus mascotas</p>
+              </div>
+              <span className="rd-option-arrow">→</span>
+            </div>
+            <div className="rd-option" onClick={() => navigate('/completar-perfil/refugio')}>
+              <div className="rd-option-icon">👤</div>
+              <div className="rd-option-info">
+                <h3>Mi Perfil</h3>
+                <p>Actualizar información de tu refugio</p>
+              </div>
+              <span className="rd-option-arrow">→</span>
+            </div>
+            <div className="rd-option" onClick={() => navigate('/notificaciones')}>
+              <div className="rd-option-icon">🔔</div>
+              <div className="rd-option-info">
+                <h3>Notificaciones</h3>
+                <p>Ver mensajes y alertas recientes</p>
+              </div>
+              <span className="rd-option-arrow">→</span>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
-  // Estado rechazado - mensaje de rechazo (aunque esto no debería verse aquí
-  // ya que al rechazar se convierte en adoptante)
   if (estadoRefugio === 'rechazado') {
     return (
-      <div className="refugio-dashboard-container">
-        <header className="refugio-dashboard-header">
-          <h1>🏠 Dashboard Refugio</h1>
-          <button className="logout-button" onClick={handleLogout}>
-            Cerrar Sesión
-          </button>
-        </header>
-
-        <main className="refugio-dashboard-main">
-          <div className="estado-card rechazado">
-            <div className="estado-icon">✗</div>
+      <div className="rd-wrapper">
+        <Navbar />
+        <div className="rd-main">
+          <div className="rd-card rejected">
+            <div className="rd-card-icon rejected">✗</div>
             <h2>Tu Solicitud fue Rechazada</h2>
             <p>Tu solicitud de registro como refugio fue rechazada.</p>
-            <p className="info-text">Revisa tus datos o comunícate con el administrador para más información.</p>
+            <p className="rd-info">Contacta al administrador para más información.</p>
+            <div className="rd-btn-group">
+              <button className="rd-btn secondary" onClick={() => navigate('/')}>🏠 Volver al inicio</button>
+              <button className="rd-btn ghost" onClick={handleLogout}>Cerrar sesión</button>
+            </div>
           </div>
-        </main>
+        </div>
       </div>
     );
   }
 
-  // Por defecto, redirigir a completar perfil
   return (
-    <div className="refugio-dashboard-container">
-      <header className="refugio-dashboard-header">
-        <h1>🏠 Dashboard Refugio</h1>
-        <button className="logout-button" onClick={handleLogout}>
-          Cerrar Sesión
-        </button>
-      </header>
-
-      <main className="refugio-dashboard-main">
-        <div className="estado-card">
+    <div className="rd-wrapper">
+      <Navbar />
+      <div className="rd-main">
+        <div className="rd-card">
           <h2>Completa tu perfil</h2>
           <p>Debes completar los datos de tu refugio para continuar.</p>
-          <button 
-            className="primary-button"
-            onClick={() => navigate('/completar-perfil/refugio')}
-          >
-            Completar Perfil
-          </button>
+          <div className="rd-btn-group">
+            <button className="rd-btn primary" onClick={() => navigate('/completar-perfil/refugio')}>Completar Perfil</button>
+            <button className="rd-btn secondary" onClick={() => navigate('/')}>🏠 Volver al inicio</button>
+          </div>
         </div>
-      </main>
+      </div>
     </div>
   );
 }

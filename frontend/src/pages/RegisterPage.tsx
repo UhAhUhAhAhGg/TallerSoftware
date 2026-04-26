@@ -1,4 +1,3 @@
-//frontend/src/pages/RegisterPage.tsx
 // filepath: src/pages/RegisterPage.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -20,10 +19,7 @@ export default function RegisterPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [passwordRequirements, setPasswordRequirements] = useState({
-    length: false,
-    uppercase: false,
-    number: false,
-    special: false,
+    length: false, uppercase: false, number: false, special: false,
   });
 
   const validatePassword = (password: string) => {
@@ -38,49 +34,28 @@ export default function RegisterPage() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    
-    if (name === 'contrasena') {
-      validatePassword(value);
-    }
-    
-    // Limpiar error cuando el usuario escribe
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
-    }
+    if (name === 'contrasena') validatePassword(value);
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: '' }));
   };
 
   const validateForm = (): boolean => {
     const newErrors: Record<string, string> = {};
-
     if (!formData.nombre.trim()) newErrors.nombre = 'El nombre es requerido';
     if (!formData.apellido.trim()) newErrors.apellido = 'El apellido es requerido';
     if (!formData.correo.trim()) newErrors.correo = 'El correo es requerido';
     if (!formData.rol) newErrors.rol = 'Debes seleccionar un tipo de cuenta';
-
-    // Validar contraseña
-    if (!passwordRequirements.length) {
-      newErrors.contrasena = 'La contraseña debe tener al menos 12 caracteres';
-    } else if (!passwordRequirements.uppercase) {
-      newErrors.contrasena = 'La contraseña debe tener al menos una mayúscula';
-    } else if (!passwordRequirements.number) {
-      newErrors.contrasena = 'La contraseña debe tener al menos un número';
-    } else if (!passwordRequirements.special) {
-      newErrors.contrasena = 'La contraseña debe tener al menos un carácter especial';
-    }
-
-    if (formData.contrasena !== formData.confirmar_contrasena) {
-      newErrors.confirmar_contrasena = 'Las contraseñas no coinciden';
-    }
-
+    if (!passwordRequirements.length) newErrors.contrasena = 'Mínimo 12 caracteres';
+    else if (!passwordRequirements.uppercase) newErrors.contrasena = 'Necesita una mayúscula';
+    else if (!passwordRequirements.number) newErrors.contrasena = 'Necesita un número';
+    else if (!passwordRequirements.special) newErrors.contrasena = 'Necesita un carácter especial';
+    if (formData.contrasena !== formData.confirmar_contrasena) newErrors.confirmar_contrasena = 'Las contraseñas no coinciden';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!validateForm()) return;
-
     setLoading(true);
     try {
       const response = await authService.register({
@@ -93,17 +68,15 @@ export default function RegisterPage() {
       });
 
       if (response.success) {
-        // Guardar token y rol en localStorage
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('rol', response.data.rol);
         localStorage.setItem('userId', response.data.id_usuario);
+        // ✅ Guardar nombre
+        localStorage.setItem('nombre', formData.nombre);
+        localStorage.setItem('est_usuario', response.data.est_usuario || 'incompleto');
 
-        // Redirigir según el rol
-        if (formData.rol === 'adoptante') {
-          navigate('/completar-perfil/adoptante');
-        } else {
-          navigate('/completar-perfil/refugio');
-        }
+        if (formData.rol === 'adoptante') navigate('/completar-perfil/adoptante');
+        else navigate('/completar-perfil/refugio');
       }
     } catch (error: any) {
       setErrors({ general: error.response?.data?.mensaje || 'Error al registrar usuario' });
@@ -112,15 +85,19 @@ export default function RegisterPage() {
     }
   };
 
-  const allPasswordRequirementsMet = 
-    passwordRequirements.length && 
-    passwordRequirements.uppercase && 
-    passwordRequirements.number && 
-    passwordRequirements.special;
+  const allMet = passwordRequirements.length && passwordRequirements.uppercase && passwordRequirements.number && passwordRequirements.special;
 
   return (
     <div className="register-container">
+      <button className="register-back-btn" onClick={() => navigate('/')}>
+        ← Volver al inicio
+      </button>
+
       <div className="register-card">
+        <div className="register-brand">
+          <span>🐾</span>
+          <span className="register-brand-name">PetMatch</span>
+        </div>
         <h1>Crear Cuenta</h1>
         <p className="register-subtitle">Únete a nuestra plataforma de adopción</p>
 
@@ -130,56 +107,25 @@ export default function RegisterPage() {
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="nombre">Nombre</label>
-              <input
-                type="text"
-                id="nombre"
-                name="nombre"
-                value={formData.nombre}
-                onChange={handleChange}
-                placeholder="Tu nombre"
-                className={errors.nombre ? 'error' : ''}
-              />
+              <input type="text" id="nombre" name="nombre" value={formData.nombre} onChange={handleChange} placeholder="Tu nombre" className={errors.nombre ? 'error' : ''} />
               {errors.nombre && <span className="error-text">{errors.nombre}</span>}
             </div>
-
             <div className="form-group">
               <label htmlFor="apellido">Apellido</label>
-              <input
-                type="text"
-                id="apellido"
-                name="apellido"
-                value={formData.apellido}
-                onChange={handleChange}
-                placeholder="Tu apellido"
-                className={errors.apellido ? 'error' : ''}
-              />
+              <input type="text" id="apellido" name="apellido" value={formData.apellido} onChange={handleChange} placeholder="Tu apellido" className={errors.apellido ? 'error' : ''} />
               {errors.apellido && <span className="error-text">{errors.apellido}</span>}
             </div>
           </div>
 
           <div className="form-group">
             <label htmlFor="correo">Correo electrónico</label>
-            <input
-              type="email"
-              id="correo"
-              name="correo"
-              value={formData.correo}
-              onChange={handleChange}
-              placeholder="tu@email.com"
-              className={errors.correo ? 'error' : ''}
-            />
+            <input type="email" id="correo" name="correo" value={formData.correo} onChange={handleChange} placeholder="tu@email.com" className={errors.correo ? 'error' : ''} />
             {errors.correo && <span className="error-text">{errors.correo}</span>}
           </div>
 
           <div className="form-group">
             <label htmlFor="rol">Tipo de cuenta</label>
-            <select
-              id="rol"
-              name="rol"
-              value={formData.rol}
-              onChange={handleChange}
-              className={errors.rol ? 'error' : ''}
-            >
+            <select id="rol" name="rol" value={formData.rol} onChange={handleChange} className={errors.rol ? 'error' : ''}>
               <option value="">Selecciona una opción</option>
               <option value="adoptante">🐾 Adoptante</option>
               <option value="refugio">🏠 Refugio</option>
@@ -189,51 +135,23 @@ export default function RegisterPage() {
 
           <div className="form-group">
             <label htmlFor="contrasena">Contraseña</label>
-            <input
-              type="password"
-              id="contrasena"
-              name="contrasena"
-              value={formData.contrasena}
-              onChange={handleChange}
-              placeholder="Mínimo 12 caracteres"
-              className={errors.contrasena ? 'error' : ''}
-            />
+            <input type="password" id="contrasena" name="contrasena" value={formData.contrasena} onChange={handleChange} placeholder="Mínimo 12 caracteres" className={errors.contrasena ? 'error' : ''} />
             <div className="password-requirements">
-              <span className={passwordRequirements.length ? 'met' : ''}>
-                {passwordRequirements.length ? '✓' : '○'} Mínimo 12 caracteres
-              </span>
-              <span className={passwordRequirements.uppercase ? 'met' : ''}>
-                {passwordRequirements.uppercase ? '✓' : '○'} Una mayúscula
-              </span>
-              <span className={passwordRequirements.number ? 'met' : ''}>
-                {passwordRequirements.number ? '✓' : '○'} Un número
-              </span>
-              <span className={passwordRequirements.special ? 'met' : ''}>
-                {passwordRequirements.special ? '✓' : '○'} Un carácter especial
-              </span>
+              <span className={passwordRequirements.length ? 'met' : ''}>{passwordRequirements.length ? '✓' : '○'} 12 caracteres</span>
+              <span className={passwordRequirements.uppercase ? 'met' : ''}>{passwordRequirements.uppercase ? '✓' : '○'} Mayúscula</span>
+              <span className={passwordRequirements.number ? 'met' : ''}>{passwordRequirements.number ? '✓' : '○'} Número</span>
+              <span className={passwordRequirements.special ? 'met' : ''}>{passwordRequirements.special ? '✓' : '○'} Especial</span>
             </div>
             {errors.contrasena && <span className="error-text">{errors.contrasena}</span>}
           </div>
 
           <div className="form-group">
             <label htmlFor="confirmar_contrasena">Confirmar contraseña</label>
-            <input
-              type="password"
-              id="confirmar_contrasena"
-              name="confirmar_contrasena"
-              value={formData.confirmar_contrasena}
-              onChange={handleChange}
-              placeholder="Repite tu contraseña"
-              className={errors.confirmar_contrasena ? 'error' : ''}
-            />
+            <input type="password" id="confirmar_contrasena" name="confirmar_contrasena" value={formData.confirmar_contrasena} onChange={handleChange} placeholder="Repite tu contraseña" className={errors.confirmar_contrasena ? 'error' : ''} />
             {errors.confirmar_contrasena && <span className="error-text">{errors.confirmar_contrasena}</span>}
           </div>
 
-          <button 
-            type="submit" 
-            className="register-button"
-            disabled={loading || !allPasswordRequirementsMet}
-          >
+          <button type="submit" className="register-button" disabled={loading || !allMet}>
             {loading ? 'Registrando...' : 'Registrarse'}
           </button>
         </form>

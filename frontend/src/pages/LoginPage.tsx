@@ -7,11 +7,7 @@ import './LoginPage.css';
 export default function LoginPage() {
   const navigate = useNavigate();
   
-  const [formData, setFormData] = useState({
-    correo: '',
-    contrasena: '',
-  });
-
+  const [formData, setFormData] = useState({ correo: '', contrasena: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -23,24 +19,21 @@ export default function LoginPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!formData.correo || !formData.contrasena) {
       setError('Todos los campos son requeridos');
       return;
     }
-
     setLoading(true);
     try {
       const response = await authService.login(formData.correo, formData.contrasena);
-
       if (response.success) {
-        // Guardar token, rol y estado en localStorage
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('rol', response.data.rol);
         localStorage.setItem('userId', response.data.id_usuario);
         localStorage.setItem('est_usuario', response.data.est_usuario);
+        // ✅ Guardar nombre para mostrarlo en la navbar/home
+        localStorage.setItem('nombre', response.data.nombre || response.data.correo || 'Usuario');
 
-        // Redirigir según el rol y estado
         const rol = response.data.rol;
         const est = response.data.est_usuario;
 
@@ -49,25 +42,12 @@ export default function LoginPage() {
             navigate('/admin/dashboard');
             break;
           case 'adoptante':
-            navigate('/dashboard/adoptante');
+            if (est === 'incompleto') navigate('/completar-perfil/adoptante');
+            else navigate('/dashboard/adoptante');
             break;
           case 'refugio':
-            // Para refugio, redirigir según el estado
-            if (est === 'incompleto') {
-              // Debe completar su perfil de refugio
-              navigate('/completar-perfil/refugio');
-            } else if (est === 'pendiente') {
-              // Ya envió solicitud, espera aprobación
-              navigate('/dashboard/refugio');
-            } else if (est === 'activo') {
-              // Admin aprobó, puede acceder a todas las opciones
-              navigate('/dashboard/refugio');
-            } else if (est === 'rechazado') {
-              // Fue rechazado, se convierte en adoptante
-              navigate('/dashboard/adoptante');
-            } else {
-              navigate('/dashboard/refugio');
-            }
+            if (est === 'incompleto') navigate('/completar-perfil/refugio');
+            else navigate('/'); // ← Pendiente/activo/rechazado van al inicio
             break;
           default:
             navigate('/');
@@ -82,8 +62,17 @@ export default function LoginPage() {
 
   return (
     <div className="login-container">
+      {/* Back to home */}
+      <button className="login-back-btn" onClick={() => navigate('/')}>
+        ← Volver al inicio
+      </button>
+
       <div className="login-card">
-        <h1>🐾 PetMatch</h1>
+        <div className="login-brand">
+          <span className="login-brand-paw">🐾</span>
+          <span className="login-brand-name">PetMatch</span>
+        </div>
+        <h1>Bienvenido de vuelta</h1>
         <p className="login-subtitle">Inicia sesión en tu cuenta</p>
 
         {error && <div className="error-banner">{error}</div>}
@@ -115,17 +104,13 @@ export default function LoginPage() {
             />
           </div>
 
-          <button 
-            type="submit" 
-            className="login-button"
-            disabled={loading}
-          >
+          <button type="submit" className="login-button" disabled={loading}>
             {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
           </button>
         </form>
 
         <p className="register-link">
-          ¿No tienes cuenta? <a href="/register">Regístrate</a>
+          ¿No tienes cuenta? <a href="/register">Registrarse</a>
         </p>
       </div>
     </div>
