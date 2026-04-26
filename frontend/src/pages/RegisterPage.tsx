@@ -1,3 +1,4 @@
+//frontend/src/pages/RegisterPage.tsx
 // filepath: src/pages/RegisterPage.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
