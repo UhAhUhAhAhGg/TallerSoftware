@@ -85,6 +85,8 @@ export default function RefugioProfilePage() {
 
       if (response.data.success) {
         setSubmitted(true);
+        // Actualizar el estado en localStorage
+        localStorage.setItem('est_usuario', 'pendiente');
       }
     } catch (error: any) {
       setErrors({ general: error.response?.data?.mensaje || 'Error al guardar datos' });

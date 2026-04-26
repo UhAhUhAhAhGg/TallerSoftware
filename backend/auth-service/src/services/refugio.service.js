@@ -176,10 +176,19 @@ async function cambiarEstadoRefugio(id_refug, nuevo_estado) {
 
   // Actualizar estado del usuario según la decisión
   const est_usuario = nuevo_estado === 'aprobado' ? 'activo' : 'rechazado';
-  await pool.query(
-    `UPDATE USUARIOS SET est_usuario = $1 WHERE id_usuario = $2`,
-    [est_usuario, refugio.id_usuario]
-  );
+  
+  if (nuevo_estado === 'rechazado') {
+    // Si se rechaza, cambiar el rol a adoptante (id_rol = 2)
+    await pool.query(
+      `UPDATE USUARIOS SET est_usuario = $1, id_rol = 2 WHERE id_usuario = $2`,
+      [est_usuario, refugio.id_usuario]
+    );
+  } else {
+    await pool.query(
+      `UPDATE USUARIOS SET est_usuario = $1 WHERE id_usuario = $2`,
+      [est_usuario, refugio.id_usuario]
+    );
+  }
 
   // Notificar al refugio
   const titulo = nuevo_estado === 'aprobado'

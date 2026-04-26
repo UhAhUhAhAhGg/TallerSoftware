@@ -34,13 +34,17 @@ export default function LoginPage() {
       const response = await authService.login(formData.correo, formData.contrasena);
 
       if (response.success) {
-        // Guardar token y rol en localStorage
+        // Guardar token, rol y estado en localStorage
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('rol', response.data.rol);
         localStorage.setItem('userId', response.data.id_usuario);
+        localStorage.setItem('est_usuario', response.data.est_usuario);
 
-        // Redirigir según el rol
-        switch (response.data.rol) {
+        // Redirigir según el rol y estado
+        const rol = response.data.rol;
+        const est = response.data.est_usuario;
+
+        switch (rol) {
           case 'administrador':
             navigate('/admin/dashboard');
             break;
@@ -48,7 +52,22 @@ export default function LoginPage() {
             navigate('/dashboard/adoptante');
             break;
           case 'refugio':
-            navigate('/dashboard/refugio');
+            // Para refugio, redirigir según el estado
+            if (est === 'incompleto') {
+              // Debe completar su perfil de refugio
+              navigate('/completar-perfil/refugio');
+            } else if (est === 'pendiente') {
+              // Ya envió solicitud, espera aprobación
+              navigate('/dashboard/refugio');
+            } else if (est === 'activo') {
+              // Admin aprobó, puede acceder a todas las opciones
+              navigate('/dashboard/refugio');
+            } else if (est === 'rechazado') {
+              // Fue rechazado, se convierte en adoptante
+              navigate('/dashboard/adoptante');
+            } else {
+              navigate('/dashboard/refugio');
+            }
             break;
           default:
             navigate('/');
