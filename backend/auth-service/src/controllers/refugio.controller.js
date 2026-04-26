@@ -14,10 +14,11 @@ const {
 async function guardarDatos(req, res) {
   const id_usuario = req.usuario.id;
   
-  const { nom_refug, dir_refug, telf_refug, corr_refug, licencia_refug, descripcion } = req.body;
+  // ✅ CORREGIDO: eliminado corr_refug ya que el correo está en USUARIOS
+  const { nom_refug, dir_refug, telf_refug, licencia_refug, descripcion } = req.body;
 
-  // Validar campos requeridos
-  if (!nom_refug || !dir_refug || !telf_refug || !corr_refug || !licencia_refug) {
+  // ✅ CORREGIDO: eliminado corr_refug de la validación
+  if (!nom_refug || !dir_refug || !telf_refug || !licencia_refug) {
     return res.status(400).json({
       success: false,
       mensaje: 'Todos los campos requeridos deben ser completados'
@@ -29,7 +30,6 @@ async function guardarDatos(req, res) {
       nom_refug,
       dir_refug,
       telf_refug,
-      corr_refug,
       licencia_refug,
       descripcion
     });

@@ -1,5 +1,5 @@
 // filepath: src/pages/RefugioProfilePage.tsx
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import './RefugioProfilePage.css';
@@ -7,11 +7,11 @@ import './RefugioProfilePage.css';
 export default function RefugioProfilePage() {
   const navigate = useNavigate();
   
+  // ✅ CORREGIDO: eliminado corr_refug del estado del formulario
   const [formData, setFormData] = useState({
     nom_refug: '',
     dir_refug: '',
     telf_refug: '',
-    corr_refug: '',
     licencia_refug: '',
     descripcion: '',
   });
@@ -19,6 +19,31 @@ export default function RefugioProfilePage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  
+  // Estado del refugio para verificar aprobación
+  const [estadoRefugio, setEstadoRefugio] = useState<string | null>(null);
+  const [loadingEstado, setLoadingEstado] = useState(true);
+  const [datosGuardados, setDatosGuardados] = useState<any>(null);
+
+  // Verificar estado del refugio al cargar la página
+  useEffect(() => {
+    verificarEstadoRefugio();
+  }, []);
+
+  const verificarEstadoRefugio = async () => {
+    try {
+      const response = await api.get('/refugios/datos');
+      if (response.data.success && response.data.data) {
+        setEstadoRefugio(response.data.data.est_aprobacion);
+        setDatosGuardados(response.data.data);
+      }
+    } catch (error) {
+      // Si no tiene datos, permanece null
+      console.log('Refugio sin perfil completado');
+    } finally {
+      setLoadingEstado(false);
+    }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -35,7 +60,7 @@ export default function RefugioProfilePage() {
     if (!formData.nom_refug.trim()) newErrors.nom_refug = 'El nombre del refugio es requerido';
     if (!formData.dir_refug.trim()) newErrors.dir_refug = 'La dirección es requerida';
     if (!formData.telf_refug.trim()) newErrors.telf_refug = 'El teléfono es requerido';
-    if (!formData.corr_refug.trim()) newErrors.corr_refug = 'El correo es requerido';
+    // ✅ CORREGIDO: eliminada validación de corr_refug
     if (!formData.licencia_refug.trim()) newErrors.licencia_refug = 'El número de licencia es requerido';
 
     setErrors(newErrors);
@@ -49,7 +74,14 @@ export default function RefugioProfilePage() {
 
     setLoading(true);
     try {
-      const response = await api.post('/refugios/datos', formData);
+      // ✅ CORREGIDO: eliminado corr_refug del payload
+      const response = await api.post('/refugios/datos', {
+        nom_refug: formData.nom_refug,
+        dir_refug: formData.dir_refug,
+        telf_refug: formData.telf_refug,
+        licencia_refug: formData.licencia_refug,
+        descripcion: formData.descripcion,
+      });
 
       if (response.data.success) {
         setSubmitted(true);
@@ -61,21 +93,77 @@ export default function RefugioProfilePage() {
     }
   };
 
-  if (submitted) {
+  // Mostrar estado según verificación
+  if (loadingEstado) {
+    return (
+      <div className="profile-container">
+        <div className="profile-card">
+          <div className="loading">Verificando estado...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Si ya tiene estado aprobado - mostrar mensaje de éxito
+  if (estadoRefugio === 'aprobado') {
     return (
       <div className="profile-container">
         <div className="profile-card">
           <div className="success-message">
             <div className="success-icon">✓</div>
-            <h2>¡Datos Enviados!</h2>
-            <p>Tu refugio está pendiente de validación por un administrador.</p>
-            <p className="info-text">Recibirás una notificación cuando tu perfil sea aprobado.</p>
+            <h2>¡Tu Solicitud fue Aprobada!</h2>
+            <p>Ya puedes acceder a las funcionalidades como refugio.</p>
             <button 
               className="home-button"
               onClick={() => navigate('/dashboard/refugio')}
             >
               Ir al Dashboard
             </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Si ya tiene estado rechazado - mostrar mensaje de rechazo
+  if (estadoRefugio === 'rechazado') {
+    return (
+      <div className="profile-container">
+        <div className="profile-card">
+          <div className="error-message">
+            <div className="error-icon">✗</div>
+            <h2>Tu Solicitud fue Rechazada</h2>
+            <p>Tu solicitud de registro fue rechazada.</p>
+            <p className="info-text">Revisa tus datos o comunícate con el administrador para más información.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Si ya fue enviado y está pendiente - mostrar mensaje de espera con datos guardados
+  if (submitted || (estadoRefugio === 'pendiente' && datosGuardados)) {
+    return (
+      <div className="profile-container">
+        <div className="profile-card">
+          <div className="success-message">
+            <div className="success-icon">⏳</div>
+            <h2>¡Datos Enviados!</h2>
+            <p>Tu refugio está pendiente de validación por un administrador.</p>
+            <p className="info-text">Recibirás una notificación cuando tu perfil sea aprobado.</p>
+            
+            {/* Mostrar datos guardados si existen */}
+            {datosGuardados && (
+              <div className="datos-guardados">
+                <h3>Datos enviados:</h3>
+                <p><strong>Nombre:</strong> {datosGuardados.nom_refug}</p>
+                <p><strong>Dirección:</strong> {datosGuardados.dir_refug}</p>
+                <p><strong>Teléfono:</strong> {datosGuardados.telf_refug}</p>
+                <p><strong>Licencia:</strong> {datosGuardados.licencia_refug}</p>
+              </div>
+            )}
+            
+            {/* NO se muestra botón mientras esté pendiente */}
           </div>
         </div>
       </div>
@@ -121,6 +209,7 @@ export default function RefugioProfilePage() {
             {errors.dir_refug && <span className="error-text">{errors.dir_refug}</span>}
           </div>
 
+          {/* ✅ CORREGIDO: eliminado el campo corr_refug del formulario */}
           <div className="form-row">
             <div className="form-group">
               <label htmlFor="telf_refug">Teléfono *</label>
@@ -137,32 +226,18 @@ export default function RefugioProfilePage() {
             </div>
 
             <div className="form-group">
-              <label htmlFor="corr_refug">Correo del Refugio *</label>
+              <label htmlFor="licencia_refug">Número de Licencia *</label>
               <input
-                type="email"
-                id="corr_refug"
-                name="corr_refug"
-                value={formData.corr_refug}
+                type="text"
+                id="licencia_refug"
+                name="licencia_refug"
+                value={formData.licencia_refug}
                 onChange={handleChange}
-                placeholder="correo@refugio.com"
-                className={errors.corr_refug ? 'error' : ''}
+                placeholder="Licencia o registro oficial"
+                className={errors.licencia_refug ? 'error' : ''}
               />
-              {errors.corr_refug && <span className="error-text">{errors.corr_refug}</span>}
+              {errors.licencia_refug && <span className="error-text">{errors.licencia_refug}</span>}
             </div>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="licencia_refug">Número de Licencia *</label>
-            <input
-              type="text"
-              id="licencia_refug"
-              name="licencia_refug"
-              value={formData.licencia_refug}
-              onChange={handleChange}
-              placeholder="Licencia o registro oficial"
-              className={errors.licencia_refug ? 'error' : ''}
-            />
-            {errors.licencia_refug && <span className="error-text">{errors.licencia_refug}</span>}
           </div>
 
           <div className="form-group">

@@ -79,13 +79,12 @@ export const perfilService = {
   },
 };
 
-// Funciones de refugio
+// ✅ CORREGIDO: eliminado corr_refug del tipo y del llamado
 export const refugioService = {
   guardarDatos: async (data: {
     nom_refug: string;
     dir_refug: string;
     telf_refug: string;
-    corr_refug: string;
     licencia_refug: string;
     descripcion?: string;
   }) => {
@@ -105,6 +104,34 @@ export const refugioService = {
 
   cambiarEstado: async (id_refug: number, estado: 'aprobado' | 'rechazado') => {
     const response = await api.patch(`/refugios/admin/refugio/${id_refug}/estado`, { estado });
+    return response.data;
+  },
+};
+
+// Funciones de notificaciones
+export const notificacionService = {
+  obtenerNotificaciones: async () => {
+    const response = await api.get('/notificaciones');
+    return response.data;
+  },
+
+  obtenerNoLeidas: async () => {
+    const response = await api.get('/notificaciones/no-leidas');
+    return response.data;
+  },
+
+  marcarLeida: async (id_notif: number) => {
+    const response = await api.patch(`/notificaciones/${id_notif}/leida`);
+    return response.data;
+  },
+
+  marcarTodasLeidas: async () => {
+    const response = await api.patch('/notificaciones/leer-todas');
+    return response.data;
+  },
+
+  eliminar: async (id_notif: number) => {
+    const response = await api.delete(`/notificaciones/${id_notif}`);
     return response.data;
   },
 };
