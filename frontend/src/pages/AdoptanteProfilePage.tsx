@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { perfilService } from '../services/api';
-import Navbar from '../components/Navbar.css';
+import Navbar from './Navbar';
 import './AdoptanteProfilePage.css';
 
 interface Especie {
@@ -87,7 +87,6 @@ export default function AdoptanteProfilePage() {
       <Navbar />
       <div className="ap-container">
         <div className="ap-card">
-          {/* Breadcrumb */}
           <div className="ap-breadcrumb">
             <button onClick={() => navigate('/')}>Inicio</button>
             <span>›</span>
@@ -121,7 +120,10 @@ export default function AdoptanteProfilePage() {
               </div>
 
               <div className="form-group checkbox-group">
-                <label><input type="checkbox" name="tiene_patio" checked={formData.tiene_patio} onChange={handleChange} /><span>¿Tienes patio o espacio exterior?</span></label>
+                <label>
+                  <input type="checkbox" name="tiene_patio" checked={formData.tiene_patio} onChange={handleChange} />
+                  <span>¿Tienes patio o espacio exterior?</span>
+                </label>
               </div>
 
               <div className="form-group">
@@ -140,7 +142,10 @@ export default function AdoptanteProfilePage() {
             <div className="ap-section">
               <h2 className="ap-section-title">🐕 Experiencia con animales</h2>
               <div className="form-group checkbox-group">
-                <label><input type="checkbox" name="exp_previa" checked={formData.exp_previa} onChange={handleChange} /><span>¿Tienes experiencia previa con animales?</span></label>
+                <label>
+                  <input type="checkbox" name="exp_previa" checked={formData.exp_previa} onChange={handleChange} />
+                  <span>¿Tienes experiencia previa con animales?</span>
+                </label>
               </div>
               {formData.exp_previa && (
                 <div className="form-group">
@@ -189,10 +194,16 @@ export default function AdoptanteProfilePage() {
             <div className="ap-section">
               <h2 className="ap-section-title">✨ Compatibilidad</h2>
               <div className="form-group checkbox-group">
-                <label><input type="checkbox" name="acepta_ninos" checked={formData.acepta_ninos} onChange={handleChange} /><span>Acepto mascotas que se llevan bien con niños</span></label>
+                <label>
+                  <input type="checkbox" name="acepta_ninos" checked={formData.acepta_ninos} onChange={handleChange} />
+                  <span>Acepto mascotas que se llevan bien con niños</span>
+                </label>
               </div>
               <div className="form-group checkbox-group">
-                <label><input type="checkbox" name="acepta_otros" checked={formData.acepta_otros} onChange={handleChange} /><span>Acepto mascotas que convivan con otros animales</span></label>
+                <label>
+                  <input type="checkbox" name="acepta_otros" checked={formData.acepta_otros} onChange={handleChange} />
+                  <span>Acepto mascotas que convivan con otros animales</span>
+                </label>
               </div>
             </div>
 

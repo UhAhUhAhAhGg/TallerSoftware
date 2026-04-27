@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
-import Navbar from '../pages/Navbar.css';
+import Navbar from './Navbar';
 import './RefugioDashboard.css';
 
 export default function RefugioDashboard() {
@@ -141,7 +141,7 @@ export default function RefugioDashboard() {
             <div className="rd-card-icon rejected">✗</div>
             <h2>Tu Solicitud fue Rechazada</h2>
             <p>Tu solicitud de registro como refugio fue rechazada.</p>
-            <p className="rd-info">Contacta al administrador para más información.</p>
+            <p className="rd-info">Por favor comuníquese con el administrador para más información.</p>
             <div className="rd-btn-group">
               <button className="rd-btn secondary" onClick={() => navigate('/')}>🏠 Volver al inicio</button>
               <button className="rd-btn ghost" onClick={handleLogout}>Cerrar sesión</button>

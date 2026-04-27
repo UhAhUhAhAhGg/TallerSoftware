@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
-import Navbar from '../components/Navbar';
+import Navbar from './Navbar';
 import './AdminDashboard.css';
 
 interface Refugio {
